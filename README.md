@@ -18,3 +18,6 @@
 1. 克隆项目
 ```bash
 git clone https://github.com/JokerZed1/light-chat-backend.git
+
+##
+“注意使用时请自行配置数据库连接”

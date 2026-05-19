@@ -1,0 +1,96 @@
+server:
+  port: 8080
+  address: 0.0.0.0    # 关键！允许外部 IP 访问
+
+spring:
+  application:
+    name: game-community
+
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/game_community?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf-8
+    username: root
+    password: 200506   # 改成你的密码
+
+    redis:
+      host: localhost
+      port: 6379
+      password:      # 如果没有密码留空
+      database: 0
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+    servlet:
+      multipart:
+        enabled: true
+        max-file-size: 10MB        # 单文件最大10MB
+        max-request-size: 50MB     # 单次请求最大50MB
+
+# 上传文件存储路径（可配置在外部目录）
+file:
+  upload:
+    path: ${user.home}/game-community/uploads/images/       # 相对路径，实际会存在项目同级目录
+    access-path: /api/uploads/     # 访问映射路径
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  # XML 映射文件位置（虽然今天还没用到 XML，但先配置上）
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类别名包
+  type-aliases-package: com.yougame.entity
+  configuration:
+    # 日志输出 SQL 语句，方便调试
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 数据库字段下划线转驼峰（默认就是 true，这里显式声明）
+    map-underscore-to-camel-case: true
+
+# 日志级别
+logging:
+  level:
+    com.yougame: debug
+
+#JWT配置
+jwt:
+  # 密钥（至少 32 字符，生产环境必须使用更复杂的密钥并放在环境变量中）
+  secret: yougame-jwt-secret-key-2024-must-be-very-long-and-secure
+  # Token 有效期（24小时 = 86400000 毫秒）
+  expiration: 86400000
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: 模块
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: '认证模块'
+      paths-to-match: '/api/auth/**'
+    - group: '帖子模块'
+      paths-to-match: '/api/posts/**'
+    - group: '评论模块'
+      paths-to-match: '/api/comments/**'
+    - group: '个人中心'
+      paths-to-match: '/api/profile/**'
+    - group: '管理后台'
+      paths-to-match: '/api/admin/**'
+    - group: '分类接口'
+      paths-to-match: '/api/categories/**'
+
+# 系统初始化配置
+app:
+  init:
+    admin:
+      username: Admin
+      password: Admin@123456   # 建议通过环境变量覆盖
+      nickname: 系统管理员
+
+

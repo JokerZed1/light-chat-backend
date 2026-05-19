@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yougame.mapper.PostMapper">
+
+    <!-- ==================== 基础映射 ==================== -->
+    <resultMap id="BasePostMap" type="com.yougame.entity.Post">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="user_id" property="userId"/>
+        <result column="game_id" property="gameId"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="comment_count" property="commentCount"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="PostDetailMap" type="com.yougame.entity.Post" extends="BasePostMap">
+        <result column="username" property="username"/>   <!-- 如果你需要，可以保留 -->
+        <result column="nickname" property="authorNickname"/>
+        <result column="avatar" property="authorAvatar"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="game_name" property="gameName"/>
+    </resultMap>
+
+    <!-- ==================== 插入 ==================== -->
+    <insert id="insertPost" parameterType="com.yougame.entity.Post" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO post(title, content, user_id, game_id, category_id,
+                         view_count, like_count, comment_count, status, create_time, update_time)
+        VALUES(#{title}, #{content}, #{userId}, #{gameId}, #{categoryId},
+               0, 0, 0, 1, NOW(), NOW())
+    </insert>
+
+    <!-- ==================== 查询 ==================== -->
+    <select id="selectPostById" resultMap="BasePostMap">
+        SELECT * FROM post WHERE id = #{id} AND status = 1
+    </select>
+
+    <select id="selectPostDetailById" resultMap="PostDetailMap">
+        SELECT p.*,
+               u.username, u.nickname, u.avatar,
+               c.name AS category_name
+        FROM post p
+                 LEFT JOIN user u ON p.user_id = u.id
+                 LEFT JOIN category c ON p.category_id = c.id
+        WHERE p.id = #{id} AND p.status = 1
+    </select>
+
+    <select id="selectPostsWithPage" resultMap="PostDetailMap">
+        SELECT p.*,
+        u.nickname, u.avatar,
+        c.name as category_name,
+        g.name as game_name
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        LEFT JOIN category c ON p.category_id = c.id
+        LEFT JOIN game g ON p.game_id = g.id
+        WHERE p.status = 1
+        <if test="gameId != null">
+            AND p.game_id = #{gameId}
+        </if>
+        <if test="categoryId != null">
+            AND p.category_id = #{categoryId}
+        </if>
+        ORDER BY
+        <choose>
+            <when test="orderBy == 'like_count'">p.like_count DESC, p.create_time DESC</when>
+            <when test="orderBy == 'comment_count'">p.comment_count DESC, p.create_time DESC</when>
+            <otherwise>p.create_time DESC</otherwise>
+        </choose>
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countPosts" resultType="int">
+        SELECT COUNT(*) FROM post WHERE status = 1
+        <if test="gameId != null">
+            AND game_id = #{gameId}
+        </if>
+        <if test="categoryId != null">
+            AND category_id = #{categoryId}
+        </if>
+    </select>
+
+    <!-- 个人中心：我的帖子 -->
+    <select id="selectMyPosts" resultMap="BasePostMap">
+        SELECT * FROM post WHERE user_id = #{userId} AND status = 1
+        ORDER BY create_time DESC LIMIT #{offset}, #{limit}
+    </select>
+    <select id="countMyPosts" resultType="int">
+        SELECT COUNT(*) FROM post WHERE user_id = #{userId} AND status = 1
+    </select>
+
+    <!-- 游戏分类：我的帖子 -->
+    <select id="selectPostsByGameId" resultMap="PostDetailMap">
+        SELECT p.*, u.nickname, u.avatar,
+        c.name AS category_name, g.name AS game_name
+        FROM post p
+        LEFT JOIN user u ON p.user_id = u.id
+        LEFT JOIN category c ON p.category_id = c.id
+        LEFT JOIN game g ON p.game_id = g.id
+        WHERE p.status = 1
+        <if test="gameId != null">
+            AND p.game_id = #{gameId}
+        </if>
+        ORDER BY p.create_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- ==================== 更新 ==================== -->
+    <update id="updatePost" parameterType="com.yougame.entity.Post">
+        UPDATE post
+        SET title = #{title},
+            content = #{content},
+            game_id = #{gameId},
+            category_id = #{categoryId},
+            update_time = NOW()
+        WHERE id = #{id} AND status = 1
+    </update>
+
+    <update id="deletePostById">
+        UPDATE post SET status = 0, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <!-- 注意：incrementViewCount 和 updateCommentCount 在接口中已通过注解实现，这里不再重复 -->
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yougame.mapper.FavoriteMapper">
+
+    <!-- 查询我的收藏（关联帖子、用户、分类） -->
+    <select id="selectMyFavorites" resultType="com.yougame.vo.PostVO">
+        SELECT p.id, p.title, p.content, p.user_id, p.view_count, p.like_count, p.comment_count, p.create_time,
+               u.nickname AS authorNickname, u.avatar AS authorAvatar,
+               c.name AS categoryName
+        FROM user_favorite f
+                 JOIN post p ON f.post_id = p.id
+                 LEFT JOIN user u ON p.user_id = u.id
+                 LEFT JOIN category c ON p.category_id = c.id
+        WHERE f.user_id = #{userId} AND p.status = 1
+        ORDER BY f.create_time DESC
+            LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countMyFavorites" resultType="int">
+        SELECT COUNT(*)
+        FROM user_favorite f
+                 JOIN post p ON f.post_id = p.id
+        WHERE f.user_id = #{userId} AND p.status = 1
+    </select>
+
+</mapper>

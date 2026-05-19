@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yougame.mapper.CategoryMapper">
+
+    <!-- 查询所有分类，按 sort_order 升序 -->
+    <select id="selectAllOrderBySort" resultType="com.yougame.entity.Category">
+        SELECT id, name, icon, sort_order
+        FROM category
+        ORDER BY sort_order ASC, id ASC
+    </select>
+
+</mapper>

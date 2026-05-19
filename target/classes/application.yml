@@ -11,7 +11,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/game_community?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf-8
     username: root
-    password: 200506   # 改成你的密码
+    password:    # 改成你的密码
 
     redis:
       host: localhost

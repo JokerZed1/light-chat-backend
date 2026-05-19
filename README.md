@@ -17,4 +17,4 @@
 
 1. 克隆项目
 ```bash
-git clone https://github.com/[你的用户名]/light-chat-backend.git
+git clone https://github.com/JokerZed1/light-chat-backend.git
